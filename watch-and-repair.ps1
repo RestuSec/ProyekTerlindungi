@@ -1,5 +1,8 @@
 # watch-and-repair.ps1 - pemantau & perbaikan otomatis Proyek Terlindungi
 # Dijalankan oleh Task Scheduler tiap 10 menit.
+param(
+    [switch]$AllowWhileActive
+)
 
 $ProjectDir = "C:\Users\Suran\Documents\ProyekTerlindungi"
 $PauseMarker = Join-Path $ProjectDir ".pause-watch"
@@ -19,8 +22,12 @@ if (Test-Path -LiteralPath $PauseMarker) {
 }
 
 if (Get-Process -Name opencode -ErrorAction SilentlyContinue) {
-    Write-Log "SKIP: opencode sedang berjalan (sesi interaktif aktif), tidak ingin mengganggu."
-    exit 0
+    if ($AllowWhileActive) {
+        Write-Log "INFO: opencode sedang berjalan, tapi tes dengan -AllowWhileActive dijalankan."
+    } else {
+        Write-Log "SKIP: opencode sedang berjalan (sesi interaktif aktif), tidak ingin mengganggu."
+        exit 0
+    }
 }
 
 Set-Location -LiteralPath $ProjectDir
